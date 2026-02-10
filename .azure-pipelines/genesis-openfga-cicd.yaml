@@ -1,0 +1,69 @@
+# Genesis OpenFGA CI/CD Pipeline
+# Go-based OpenFGA with Docker build
+
+variables:
+  major: 1
+  minor: 0
+  patch: $[counter(variables['Build.SourceBranchName'], 0)]
+  globalPatch: $[counter('globalPatch', 0)]
+
+  # Container Registry Configuration
+  ACR_RESOURCE_GROUP: sprintRG
+  AZURE_CONTAINER_REGISTRY: sprintregistry
+  ACR_ENDPOINT: 'sprintregistry.azurecr.io'
+
+  # Genesis OpenFGA Configuration
+  IMAGE_NAME: 'genesis-openfga'
+  DOCKERFILE_PATH: 'Dockerfile'
+
+trigger:
+  branches:
+    include:
+    - main
+    - integration
+  paths:
+    include:
+      - cmd/**
+      - internal/**
+      - pkg/**
+      - go.mod
+      - go.sum
+      - Dockerfile
+      - .azure-pipelines/genesis-openfga-cicd.yaml
+      - .azure-pipelines/templates/*genesis-openfga*
+      - .azure-pipelines/templates/version.yml
+
+pr:
+  branches:
+    include:
+    - main
+    - integration
+  paths:
+    include:
+      - cmd/**
+      - internal/**
+      - pkg/**
+      - go.mod
+      - go.sum
+      - Dockerfile
+      - .azure-pipelines/genesis-openfga-cicd.yaml
+      - .azure-pipelines/templates/*genesis-openfga*
+
+stages:
+- stage: Version
+  displayName: 'Versioning'
+  condition: ne(variables['Build.Reason'], 'PullRequest')
+  jobs:
+  - template: templates/version.yml
+
+- stage: Build
+  displayName: 'Build Genesis OpenFGA Image'
+  dependsOn: Version
+  condition: and(succeeded(), ne(variables['Build.Reason'], 'PullRequest'))
+  jobs:
+  - template: templates/genesis-openfga-build-template.yml
+    parameters:
+      jobCondition: succeeded()
+      CONTAINER_NAME: $(IMAGE_NAME)
+      DOCKERFILE_PATH: $(DOCKERFILE_PATH)
+      AZURE_CONTAINER_REGISTRY: $(AZURE_CONTAINER_REGISTRY)
