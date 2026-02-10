@@ -1,0 +1,31 @@
+{{/* RBAC for Job status reader - needed for migration wait containers */}}
+{{/* Always create RBAC, regardless of whether we create our own SA or use a shared one */}}
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: {{ include "openfga.fullname" . }}-job-status-reader
+  labels:
+    {{- include "openfga.labels" . | nindent 4 }}
+rules:
+- apiGroups:
+  - batch
+  resources:
+  - jobs
+  verbs:
+  - get
+  - list
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: {{ include "openfga.fullname" . }}-job-status-reader
+  labels:
+    {{- include "openfga.labels" . | nindent 4 }}
+roleRef:
+  apiGroup: rbac.authorization.k8s.io
+  kind: Role
+  name: {{ include "openfga.fullname" . }}-job-status-reader
+subjects:
+- kind: ServiceAccount
+  name: {{ include "openfga.serviceAccountName" . }}
+  namespace: {{ .Release.Namespace }}
