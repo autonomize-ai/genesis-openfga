@@ -1,0 +1,24 @@
+apiVersion: v2
+name: genesis-openfga
+description: OpenFGA - Fine-Grained Authorization for Genesis Platform
+
+type: application
+version: 0.2.50
+appVersion: "v1.11.2"
+
+home: https://openfga.dev
+sources:
+  - https://github.com/autonomize-ai/genesis-openfga
+
+maintainers:
+  - name: Platform Team
+    email: jagveer@autonomize.ai
+
+keywords:
+  - openfga
+  - authorization
+  - rebac
+  - fine-grained-authorization
+  - zanzibar
+
+dependencies: []
